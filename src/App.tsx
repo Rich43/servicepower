@@ -1,8 +1,9 @@
 import React from 'react';
-import {DataGrid, GridColDef, GridFilterModel} from '@material-ui/data-grid';
+import {DataGrid, GridColDef, GridEditRowsModel, GridFilterModel} from '@material-ui/data-grid';
 import QuickSearchToolbar from "./QuickSearchToolbar";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "./reducers/interfaces";
+import {updateAction} from "./actions";
 
 const columns: GridColDef[] = [
   { field: 'id', headerName: 'ID', width: 90 },
@@ -44,8 +45,10 @@ function escapeRegExp(value: string): string {
 
 function App() {
   const [filterModel, setFilterModel] = React.useState<GridFilterModel>({items: [{}]});
+  const [editRowsModel, setEditRowsModel] = React.useState<GridEditRowsModel>({});
   const [searchText, setSearchText] = React.useState('');
   const rows = useSelector((state: RootState) => state.defaultReducer.data);
+  const dispatch = useDispatch();
   const [tempRows, setTempRows] = React.useState<any[]>(rows);
 
   const requestSearch = (searchValue: string) => {
@@ -58,6 +61,22 @@ function App() {
     });
     setTempRows(filteredRows);
   };
+
+  const handleEditRowsModelChange = React.useCallback(
+      (newModel: GridEditRowsModel) => {
+        const updatedModel = { ...newModel };
+        Object.keys(updatedModel).forEach((id) => {
+          const transformed = Object.entries(updatedModel[id]).map(entry => {
+            return {[entry[0]]: entry[1].value};
+          }).reduce((entry, other) => {
+            return {...entry, ...other};
+          });
+          dispatch(updateAction(Number(id), transformed));
+        });
+        setEditRowsModel(updatedModel);
+      },
+      [dispatch],
+  );
 
   React.useEffect(() => {
     setTempRows(rows);
@@ -82,6 +101,8 @@ function App() {
             pageSize={5}
             filterModel={filterModel}
             onFilterModelChange={(model) => setFilterModel(model)}
+            editRowsModel={editRowsModel}
+            onEditRowsModelChange={handleEditRowsModelChange}
             checkboxSelection
             disableSelectionOnClick
         />
