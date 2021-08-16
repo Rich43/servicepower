@@ -4,6 +4,8 @@ import QuickSearchToolbar from "./QuickSearchToolbar";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "./reducers/interfaces";
 import {updateAction} from "./actions";
+import {AbstractDialog} from "./AbstractDialog";
+import {Typography} from "@material-ui/core";
 
 const columns: GridColDef[] = [
   { field: 'id', headerName: 'ID', width: 90 },
@@ -47,6 +49,7 @@ function App() {
   const [filterModel, setFilterModel] = React.useState<GridFilterModel>({items: [{}]});
   const [editRowsModel, setEditRowsModel] = React.useState<GridEditRowsModel>({});
   const [searchText, setSearchText] = React.useState('');
+  const [dialogOpen, setDialogOpen] = React.useState(false);
   const rows = useSelector((state: RootState) => state.defaultReducer.data);
   const dispatch = useDispatch();
   const [tempRows, setTempRows] = React.useState<any[]>(rows);
@@ -85,6 +88,9 @@ function App() {
   return (
     <div className="App">
       <div style={{ height: '400px', width: '100%' }}>
+        <AbstractDialog dialogOpen={dialogOpen} dialogTitle="New" onClose={() => setDialogOpen(false)} okClicked={() => {}}>
+          <Typography>Testing</Typography>
+        </AbstractDialog>
         <DataGrid
             components={{
               Toolbar: QuickSearchToolbar,
@@ -94,6 +100,8 @@ function App() {
                 value: searchText,
                 onChange: (event: any) => requestSearch(event.target.value),
                 clearSearch: () => requestSearch(''),
+                newOnClick: () => setDialogOpen(true),
+                deleteOnClick: () => {}
               },
             }}
             rows={tempRows}
