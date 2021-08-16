@@ -1,15 +1,15 @@
 import React, {useRef} from 'react';
-import {DataGrid, GridEditRowsModel, GridFilterModel} from '@material-ui/data-grid';
+import {DataGrid, GridEditRowsModel, GridFilterModel, GridSelectionModel} from '@material-ui/data-grid';
 import QuickSearchToolbar from "./components/QuickSearchToolbar";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "./reducers/interfaces";
-import {updateAction} from "./actions";
+import {createAction, updateAction} from "./actions";
 import {NewDialog} from "./components/NewDialog";
 import {escapeRegExp} from "./functions";
 import {columns} from "./model/table";
 
-
 function App() {
+    const [selectionModel, setSelectionModel] = React.useState<GridSelectionModel>([]);
     const [filterModel, setFilterModel] = React.useState<GridFilterModel>({items: [{}]});
     const [editRowsModel, setEditRowsModel] = React.useState<GridEditRowsModel>({});
     const [searchText, setSearchText] = React.useState('');
@@ -56,7 +56,13 @@ function App() {
                 <NewDialog
                     dialogOpen={dialogOpen}
                     onClose={() => setDialogOpen(false)}
-                    okClicked={() => {}}
+                    okClicked={() => {
+                        dispatch(createAction({
+                            firstName: firstNameRef.current && firstNameRef.current.value,
+                            lastName: lastNameRef.current && lastNameRef.current.value,
+                            age: ageRef.current && ageRef.current.value
+                        }));
+                    }}
                     firstNameRef={firstNameRef}
                     lastNameRef={lastNameRef}
                     ageRef={ageRef}
@@ -82,6 +88,10 @@ function App() {
                     onFilterModelChange={(model) => setFilterModel(model)}
                     editRowsModel={editRowsModel}
                     onEditRowsModelChange={handleEditRowsModelChange}
+                    onSelectionModelChange={(newSelectionModel) => {
+                        setSelectionModel(newSelectionModel);
+                    }}
+                    selectionModel={selectionModel}
                     checkboxSelection
                     disableSelectionOnClick
                 />
