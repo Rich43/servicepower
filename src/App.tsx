@@ -1,67 +1,20 @@
-import React from 'react';
-import {DataGrid, GridColDef, GridEditRowsModel, GridFilterModel} from '@material-ui/data-grid';
-import QuickSearchToolbar from "./QuickSearchToolbar";
+import React, {useRef} from 'react';
+import {DataGrid, GridEditRowsModel, GridFilterModel} from '@material-ui/data-grid';
+import QuickSearchToolbar from "./components/QuickSearchToolbar";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "./reducers/interfaces";
 import {updateAction} from "./actions";
-import {AbstractDialog} from "./AbstractDialog";
-import {Box, createStyles, FormGroup, makeStyles, TextField, Theme} from "@material-ui/core";
+import {NewDialog} from "./components/NewDialog";
+import {escapeRegExp} from "./functions";
+import {columns} from "./model/table";
 
-const columns: GridColDef[] = [
-    {field: 'id', headerName: 'ID', width: 90},
-    {
-        field: 'firstName',
-        headerName: 'First name',
-        width: 150,
-        editable: true,
-    },
-    {
-        field: 'lastName',
-        headerName: 'Last name',
-        width: 150,
-        editable: true,
-    },
-    {
-        field: 'age',
-        headerName: 'Age',
-        type: 'number',
-        width: 110,
-        editable: true,
-    },
-    {
-        field: 'fullName',
-        headerName: 'Full name',
-        description: 'This column has a value getter and is not sortable.',
-        sortable: false,
-        width: 160,
-        valueGetter: (params) =>
-            `${params.getValue(params.id, 'firstName') || ''} ${
-                params.getValue(params.id, 'lastName') || ''
-            }`,
-    },
-];
-
-function escapeRegExp(value: string): string {
-    return value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-}
-
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            width: 300,
-            '& .MuiTextField-root': {
-                margin: theme.spacing(0.5),
-            },
-        },
-    }),
-);
 
 function App() {
-    const classes = useStyles();
     const [filterModel, setFilterModel] = React.useState<GridFilterModel>({items: [{}]});
     const [editRowsModel, setEditRowsModel] = React.useState<GridEditRowsModel>({});
     const [searchText, setSearchText] = React.useState('');
     const [dialogOpen, setDialogOpen] = React.useState(false);
+    const [firstNameRef, lastNameRef, ageRef] = [useRef(null), useRef(null), useRef(null)];
     const rows = useSelector((state: RootState) => state.defaultReducer.data);
     const dispatch = useDispatch();
     const [tempRows, setTempRows] = React.useState<any[]>(rows);
@@ -100,17 +53,14 @@ function App() {
     return (
         <div className="App">
             <div style={{height: '400px', width: '100%'}}>
-                <AbstractDialog dialogOpen={dialogOpen} dialogTitle="New" onClose={() => setDialogOpen(false)}
-                                okClicked={() => {
-                                }}>
-                    <form className={classes.root}>
-                        <FormGroup>
-                            <TextField required label="First name" id="firstName"/>
-                            <TextField required label="Last name" id="lastName"/>
-                            <TextField required label="Age" id="age" type="number"/>
-                        </FormGroup>
-                    </form>
-                </AbstractDialog>
+                <NewDialog
+                    dialogOpen={dialogOpen}
+                    onClose={() => setDialogOpen(false)}
+                    okClicked={() => {}}
+                    firstNameRef={firstNameRef}
+                    lastNameRef={lastNameRef}
+                    ageRef={ageRef}
+                />
                 <DataGrid
                     components={{
                         Toolbar: QuickSearchToolbar,
