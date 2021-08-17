@@ -15,8 +15,8 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export function NewDialog(props: {
     dialogOpen: boolean, onClose: () => void, okClicked: () => void,
-    firstNameRef: React.MutableRefObject<null>, lastNameRef: React.MutableRefObject<null>,
-    ageRef: React.MutableRefObject<null>
+    firstNameRef: React.MutableRefObject<HTMLInputElement | null>, lastNameRef: React.MutableRefObject<HTMLInputElement | null>,
+    ageRef: React.MutableRefObject<HTMLInputElement | null>
 }) {
     const classes = useStyles();
     return (
@@ -24,9 +24,9 @@ export function NewDialog(props: {
                         okClicked={props.okClicked}>
             <form className={classes.root}>
                 <FormGroup>
-                    <TextField ref={props.firstNameRef} required label="First name" id="firstName"/>
-                    <TextField ref={props.lastNameRef} required label="Last name" id="lastName"/>
-                    <TextField ref={props.ageRef} required label="Age" id="age" type="number"/>
+                    <TextField inputRef={props.firstNameRef} required label="First name" id="firstName"/>
+                    <TextField inputRef={props.lastNameRef} required label="Last name" id="lastName"/>
+                    <TextField inputRef={props.ageRef} required label="Age" id="age" type="number"/>
                 </FormGroup>
             </form>
         </AbstractDialog>

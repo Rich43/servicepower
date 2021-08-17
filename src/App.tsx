@@ -3,7 +3,7 @@ import {DataGrid, GridEditRowsModel, GridFilterModel, GridSelectionModel} from '
 import QuickSearchToolbar from "./components/QuickSearchToolbar";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "./reducers/interfaces";
-import {createAction, updateAction} from "./actions";
+import {createAction, deleteAction, updateAction} from "./actions";
 import {NewDialog} from "./components/NewDialog";
 import {escapeRegExp} from "./functions";
 import {columns} from "./model/table";
@@ -14,10 +14,15 @@ function App() {
     const [editRowsModel, setEditRowsModel] = React.useState<GridEditRowsModel>({});
     const [searchText, setSearchText] = React.useState('');
     const [dialogOpen, setDialogOpen] = React.useState(false);
-    const [firstNameRef, lastNameRef, ageRef] = [useRef(null), useRef(null), useRef(null)];
+    const [page, setPage] = React.useState(0);
+    const [firstNameRef, lastNameRef, ageRef] = [
+        useRef<HTMLInputElement | null>(null), useRef<HTMLInputElement | null>(null),
+        useRef<HTMLInputElement | null>(null)
+    ];
     const rows = useSelector((state: RootState) => state.defaultReducer.data);
     const dispatch = useDispatch();
     const [tempRows, setTempRows] = React.useState<any[]>(rows);
+    const lastPage = Math.floor(tempRows.length / 5);
 
     const requestSearch = (searchValue: string) => {
         setSearchText(searchValue);
@@ -46,28 +51,31 @@ function App() {
         [dispatch],
     );
 
-    React.useEffect(() => {
+    if (rows !== tempRows && !searchText) {
         setTempRows(rows);
-    }, [rows]);
+    }
 
     return (
         <div className="App">
-            <div style={{height: '400px', width: '100%'}}>
+            <div style={{height: '420px', width: '100%'}}>
                 <NewDialog
                     dialogOpen={dialogOpen}
                     onClose={() => setDialogOpen(false)}
                     okClicked={() => {
                         dispatch(createAction({
-                            firstName: firstNameRef.current && firstNameRef.current.value,
+                            firstName: firstNameRef && firstNameRef.current && firstNameRef.current.value,
                             lastName: lastNameRef.current && lastNameRef.current.value,
                             age: ageRef.current && ageRef.current.value
                         }));
+                        setPage(lastPage);
                     }}
                     firstNameRef={firstNameRef}
                     lastNameRef={lastNameRef}
                     ageRef={ageRef}
                 />
                 <DataGrid
+                    page={page}
+                    onPageChange={page => setPage(page)}
                     components={{
                         Toolbar: QuickSearchToolbar,
                     }}
@@ -78,6 +86,9 @@ function App() {
                             clearSearch: () => requestSearch(''),
                             newOnClick: () => setDialogOpen(true),
                             deleteOnClick: () => {
+                                selectionModel.forEach(id => {
+                                    dispatch(deleteAction(Number(id)));
+                                });
                             }
                         },
                     }}
